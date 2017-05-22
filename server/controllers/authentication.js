@@ -1,4 +1,14 @@
+const jwt = require('jwt-simple');
 const User = require('../models/user');
+const config = require('../config');
+
+function tokenForUser(user) {
+  const timestamp = new Date().getTime();
+  return jwt.encode({
+    sub: user.id,
+    iat: timestamp
+  }, config.secret);
+}
 
 exports.signup = function(req, res, next) {
   const { email, password } = req.body;
@@ -6,6 +16,26 @@ exports.signup = function(req, res, next) {
   if (!email || !password) {
     return res.status(422).send({ error: 'You must provide email and password'});
   }
+
+  User.findOne({ email })
+  .then(existingUser => {
+    if (existingUser) {
+      res.status(422).send({ error: 'Email is in use' });
+    }
+
+    const user = new User({ email, password });
+
+    user.save()
+    .then(newUser => {
+      res.json({ token: tokenForUser(user) });
+    })
+    .catch(err => {
+      return next(err)
+    });
+  })
+  .catch(err => {
+    return next(err);
+  })
 
   // User.findOne({ email }, function(err, existingUser) {
   //   if (err) { return next(err); }
@@ -28,23 +58,5 @@ exports.signup = function(req, res, next) {
   //     });
   // });
 
-  User.findOne({ email })
-    .then(existingUser => {
-      if (existingUser) {
-        res.status(422).send({ error: 'Email is in use' });
-      }
 
-      const user = new User({ email, password });
-
-      user.save()
-        .then(newUser => {
-          res.json({ success: true });
-        })
-        .catch(err => {
-          return next(err)
-        });
-    })
-    .catch(err => {
-      return next(err);
-    })
 }
