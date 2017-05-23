@@ -10,3 +10,10 @@ The following `README.md` is to consolidate the key learning points for future r
 The tutorial can be found [here](https://www.udemy.com/react-redux-tutorial/)
 
 ## Key Learning Points
+### Redux Thunk
+- Redux middleware that allows access to the dispatch method.
+- Redux thunk allows you to return a function from an action creator.
+
+### CORS
+- Cross Origin Resource Sharing.
+- Security protocol to protect users in a browser environment.
